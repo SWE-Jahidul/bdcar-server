@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const { MongoClient } = require("mongodb");
 const ObjectId = require("mongodb").ObjectId;
+const { response } = require("express");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -26,6 +27,7 @@ async function run() {
     const ordersCollectioin = database.collection("orders");
     const newsCollection = database.collection("news");
     const revirewsColection = database.collection("reviews");
+    const customerReviewCollection = database.collection("customerreview");
 
     // users post api
     app.get("/users/:email", async (req, res) => {
@@ -94,6 +96,28 @@ async function run() {
       res.json(result);
     });
 
+    // app.put("/like/:id",  async (req, res) => {
+    //   try {
+    //     const post = await product.findByid(req.params._id);
+
+    //     if (
+    //       post.likes.filter((like) => like.user.toString() == req.user.id)
+    //         .lenght > 0
+    //     ) {
+    //       return res.json(400).json({ msg: "post Already  lliked " });
+    //     }
+
+    //     post.likes.unshift({ user: req.user.id });
+    //     await post.save();
+    //     res.json(post.likes);
+    //   } catch (err) {
+    //     console.log(err.message);
+    //     res.status(500).send("Server Errro ");
+    //   }
+    // });
+
+    //
+
     // Product Delete by admin
     app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
@@ -103,16 +127,35 @@ async function run() {
       res.json(result);
     });
 
+    // post reviews api
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await revirewsColection.insertOne(review);
+      res.json(result);
+    });
+
+    // get Reviews
     app.get("/reviews", async (req, res) => {
       const cursor = revirewsColection.find({});
       const review = await cursor.toArray();
       res.send(review);
     });
-    // add products api
-    app.post("/reviews", async (req, res) => {
-      const review = req.body;
-      const result = await revirewsColection.insertOne(review);
-      res.json(result);
+
+    // post customar reviews
+    app.post("/customerreviews", async (req, res) => {
+      const cus_review = req.body;
+      const customerReviewsResult = await customerReviewCollection.insertOne(
+        cus_review
+      );
+      res.json(customerReviewsResult);
+    });
+
+    // get customer reviws
+
+    app.get("/customerreviews", async (req, res) => {
+      const cust_review = customerReviewCollection.find({});
+      const customarreview = await cust_review.toArray();
+      res.send(customarreview);
     });
 
     // Add News Section
