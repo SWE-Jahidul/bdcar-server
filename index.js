@@ -42,8 +42,17 @@ async function run() {
     });
     app.post("/users", async (req, res) => {
       const user = req.body;
-      const result = await usersCollectioin.insertOne(user);
-      res.json(result);
+
+      await user.save((err) => {
+        if (err) {
+          res.status(500).json({
+            error: " there was a server side error !",
+          });
+        } else {
+          const result = usersCollectioin.insertOne(user);
+          res.json(result);
+        }
+      });
     });
 
     app.get("/users", async (req, res) => {
@@ -65,8 +74,15 @@ async function run() {
     // add order api
     app.post("/orders", async (req, res) => {
       const order = req.body;
-      const result = await ordersCollectioin.insertOne(order);
-      res.json(result);
+
+      await order.save((err) => {
+        if (err) {
+          res.status(500).json({ error: "Server side Error " });
+        } else {
+          const result = ordersCollectioin.insertOne(order);
+          res.json(result);
+        }
+      });
     });
     //order get api
     app.get("/orders", async (req, res) => {
@@ -92,8 +108,15 @@ async function run() {
     // add products api
     app.post("/products", async (req, res) => {
       const product = req.body;
-      const result = await productsCollectioin.insertOne(product);
-      res.json(result);
+
+      await product.save((err) => {
+        if (err) {
+          res.status(500).json({ error: " There was a server side error !" });
+        } else {
+          const result = productsCollectioin.insertOne(product);
+          res.json(result);
+        }
+      });
     });
 
     // app.put("/like/:id",  async (req, res) => {
