@@ -2,12 +2,18 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+var admint = require("firebase-admin");
 
 const { MongoClient } = require("mongodb");
 const ObjectId = require("mongodb").ObjectId;
 const { response } = require("express");
 const port = process.env.PORT || 5000;
 
+// firebase admin initialization
+
+var serviceAccount = require("./bdcar-4c9be-firebase-adminsdk-gbazj-74185b1b69.json");
+
+// Middle ware
 app.use(cors());
 app.use(express.json());
 
@@ -18,6 +24,20 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
+async function verifyToken(req, res, next) {
+  if (req.headers?.authorization?.startsWith("Bearer ")) {
+    const idToken = req.headers.authorization.split("Bearer ")[1];
+    console.log("id token", idToken);
+    try {
+      //  Problem is here email can not get please try again
+      const decodedUser = await admint.auth().verifyIdToken(idToken);
+      req.decodedUserEamil = decodedUser.email;
+
+      // console.log("email ", decodedUser);
+    } catch {}
+  }
+  next();
+}
 async function run() {
   try {
     await client.connect();
@@ -85,7 +105,9 @@ async function run() {
       });
     });
     //order get api
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyToken, async (req, res) => {
+      // console.log( req.headers.authorization);
+
       const cursor = ordersCollectioin.find({});
       const order = await cursor.toArray();
       res.send(order);
